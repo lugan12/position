@@ -17,7 +17,7 @@ object Demo02 {
   def main(args: Array[String]): Unit = {
     val env: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(1)
-    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
+    env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)
 
     val data: DataStream[String] = env.addSource(MyKafkaUtil.getConsumer("test"))
     val value: DataStream[(String, BigDecimal)] = data.map(t => {
@@ -58,10 +58,10 @@ object Demo02 {
     value.print("print(1):")
     val reducedDS: DataStream[(String, BigDecimal)] = value
       .keyBy(_._1)
-      .timeWindow(Time.hours(1), Time.minutes(5))
+      .timeWindow(Time.seconds(2))
       //  .aggregate(new Agg)
       .reduce((a, b) => (a._1, a._2.add(b._2)))
-    reducedDS.print()
+    reducedDS.print("result : ")
 
 
     env.execute()
