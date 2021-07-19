@@ -17,7 +17,7 @@ object Demo02 {
   def main(args: Array[String]): Unit = {
     val env: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(1)
-    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
+    env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)
 
     val data: DataStream[String] = env.addSource(MyKafkaUtil.getConsumer("test"))
     val value: DataStream[(String, BigDecimal)] = data.map(t => {
@@ -56,42 +56,29 @@ object Demo02 {
       (regStr, amt)
     })
     value.print("print(1):")
+    /**
+      * 两种算子（reduce,aggregate）可以实现聚合操作
+      */
     val reducedDS: DataStream[(String, BigDecimal)] = value
       .keyBy(_._1)
-      .timeWindow(Time.hours(1), Time.minutes(5))
-      //  .aggregate(new Agg)
-      .reduce((a, b) => (a._1, a._2.add(b._2)))
-    reducedDS.print()
+      .timeWindow(Time.seconds(2))
+        .aggregate(new Agg)
+//      .reduce((a, b) => (a._1, a._2.add(b._2)))
+    reducedDS.print("result : ")
 
 
     env.execute()
   }
 
-  //  class Agg extends AggregateFunction[(String, BigDecimal), BigDecimal, BigDecimal] {
   //
-  //    override def add(in: (String, BigDecimal), acc: BigDecimal): BigDecimal = {
-  //      in._2.add(acc)
-  //    }
-  //
-  //    override def createAccumulator(): BigDecimal = BigDecimal.ZERO
-  //
-  //    override def getResult(acc: BigDecimal):  BigDecimal = {
-  //      acc
-  //    }
-  //
-  //    override def merge(acc: BigDecimal, acc1: BigDecimal): BigDecimal = {
-  //      acc.add(acc1)
-  //    }
   class Agg extends AggregateFunction[(String, BigDecimal), (String, BigDecimal), (String, BigDecimal)] {
-    private var key: String = _;
 
     override def add(in: (String, BigDecimal), acc: (String, BigDecimal)): (String, BigDecimal) = {
-      key = in._1
       (in._1, in._2.add(acc._2))
     }
 
     override def createAccumulator(): (String, BigDecimal) = {
-      (key,BigDecimal.ZERO)
+      ("",BigDecimal.ZERO)
     }
 
     override def getResult(acc: (String, BigDecimal)): (String, BigDecimal) = {
@@ -107,7 +94,6 @@ object Demo02 {
     override def apply(key: BigDecimal, window: TimeWindow, input: lang.Iterable[BigDecimal], out: Collector[(BigDecimal, Long, BigDecimal)]): Unit = {
       out.collect((key, window.getEnd, input.iterator().next()))
     }
-
   }
 
 }
