@@ -1,23 +1,21 @@
 package com.lugan.flink.calc
 
-import java.{lang, util}
 import java.math.BigDecimal
+import java.{lang, util}
 
 import com.alibaba.fastjson.{JSON, JSONObject}
-import com.lugan.flink.entity.{DCCacheEntity, DCEntity}
+import com.lugan.flink.entity.DCCacheEntity
 import com.lugan.flink.util.{ComUtil, MyKafkaUtil}
-import org.apache.flink.api.common.functions.{AggregateFunction, MapFunction}
-import org.apache.flink.api.common.state.{ListState, ListStateDescriptor, MapState, MapStateDescriptor}
+import org.apache.flink.api.common.functions.AggregateFunction
+import org.apache.flink.api.common.state.{MapState, MapStateDescriptor}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
-import org.apache.flink.streaming.api.scala.function.WindowFunction
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.scala.function.WindowFunction
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow
 import org.apache.flink.util.Collector
-
-import scala.collection.mutable.ListBuffer
 
 /**
   * 分组条件：日期（date）,时间（time）,币种（ccy）,机构，出入

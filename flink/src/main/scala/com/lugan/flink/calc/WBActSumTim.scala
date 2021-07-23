@@ -5,6 +5,7 @@ import java.math.BigDecimal
 import com.alibaba.fastjson.{JSON, JSONObject}
 import com.lugan.flink.entity.WBActSumBalJson
 import com.lugan.flink.util.MyKafkaUtil
+import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.util.Collector
@@ -20,7 +21,7 @@ object WBActSumTim {
     val env: StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
     //设置并行度
     env.setParallelism(1)
-    //    env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)
+        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)
     val sourceData: DataStream[String] = env.addSource(MyKafkaUtil.getConsumer("act"))
     val mapedDataStream: DataStream[WBActSumBalJson] = sourceData.map { t => {
       val jSONObject: JSONObject = JSON.parseObject(t)
