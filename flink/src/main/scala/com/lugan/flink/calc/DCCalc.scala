@@ -91,11 +91,6 @@ class countAmt extends KeyedProcessFunction[String, DCCacheEntity, DCCacheEntity
     entityMapState = getRuntimeContext.getMapState(new MapStateDescriptor[String, DCCacheEntity]("entityMap", classOf[String], classOf[DCCacheEntity]))
   }
 
-  override def onTimer(timestamp: Long, ctx: KeyedProcessFunction[String, DCCacheEntity, DCCacheEntity]#OnTimerContext, out: Collector[DCCacheEntity]): Unit = {
-
-
-  }
-
   override def processElement(value: DCCacheEntity, ctx: KeyedProcessFunction[String, DCCacheEntity, DCCacheEntity]#Context, out: Collector[DCCacheEntity]): Unit = {
 
     if (entityMapState.contains(value.key)) {
@@ -108,8 +103,8 @@ class countAmt extends KeyedProcessFunction[String, DCCacheEntity, DCCacheEntity
     }
 
     val entities: lang.Iterable[DCCacheEntity] = entityMapState.values()
-   val unit: util.Iterator[DCCacheEntity] = entities.iterator()
-    while (unit.hasNext){
+    val unit: util.Iterator[DCCacheEntity] = entities.iterator()
+    while (unit.hasNext) {
       val entity: DCCacheEntity = unit.next()
       //求总和
       entity.sumBal = entity.inBal.add(entity.outBal)
