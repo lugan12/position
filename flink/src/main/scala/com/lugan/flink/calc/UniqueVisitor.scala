@@ -11,6 +11,7 @@ import org.apache.flink.util.Collector
 
 /**
   * 非布隆过滤器版本的UV统计
+  * AllWindowFunction函数的使用
   */
 object UniqueVisitor {
 
