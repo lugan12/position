@@ -25,6 +25,8 @@ import org.apache.flink.util.Collector
   * reduceByKey（按照key进行累加聚合），
   * groupByKey（将多个字段组合成的key的数据归类到同一个key下面），
   * filter（过滤元组中key为空的数据）
+  *
+  * flink=>使用了增量聚合函数：AggregateFunction
   */
 object DCCalc {
   def main(args: Array[String]): Unit = {
