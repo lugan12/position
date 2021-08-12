@@ -25,15 +25,21 @@ object EventTimeIntervalTriggerExample {
     env.setParallelism(1)
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
     val data = env.socketTextStream("192.168.25.151", 7777)
-    data.map(new DeviceTransformer)
+    data.print("data:")
+    val mapedDS: DataStream[Device] = data.map(new DeviceTransformer)
       .assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor[Device](Time.seconds(10)) {
         override def extractTimestamp(element: Device): Long = element.ts
       })
+    mapedDS.print("maped:")
+    val rsDS: DataStream[Device] = mapedDS
       .keyBy(_.id)
-      .timeWindow(Time.minutes(1))
+      .timeWindow(Time.seconds(3))
       //触发窗口
-      .trigger(new EventTimeIntervalTrigger(5000))
+      .trigger(new EventTimeIntervalTrigger(2000))
       .maxBy(1)
+    rsDS.print("rs:")
+
+    env.execute()
     //定义聚合器
     //        .process(new AggregatePrinter)
   }
